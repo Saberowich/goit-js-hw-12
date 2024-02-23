@@ -4,49 +4,55 @@ import "izitoast/dist/css/iziToast.min.css";
 import SimpleLightbox from "simplelightbox";
 import "simplelightbox/dist/simple-lightbox.min.css";
 
-import GalerryApiService from "./gallery-service";
+import GalleryApiService from "./js/pixabay-api";
+import  generateMarkupGalerry  from "./js/render-functions";
+
 
 const inputElem = document.querySelector('.search-input');
 const formElem = document.querySelector('.search-form');
 const imagesContainer = document.querySelector('.gallery');
 const divElem = document.querySelector('div');
 const loadMoreBtn = document.querySelector('[data-action="load-more"]');
+const loader = document.querySelector('.loader')
+
+const galerryApiService = new GalleryApiService();
 
 
-const galerryApiService = new GalerryApiService();
+// const showLoader = () => {
+//   const loader = document.createElement('span');
+//   loader.classList.add('loader');
+//   loadMoreBtn.append(loader);
+// }
 
-
-const showLoader = () => {
-  const loader = document.createElement('span');
-  loader.classList.add('loader');
-  loadMoreBtn.append(loader);
-}
-
-const hideLoader = () => {
-  const loader = document.querySelector('.loader');
-  if (loader) {
-    loader.remove();
-  }
-}
+// const hideLoader = () => {
+//   const loader = document.querySelector('.loader');
+//   if (loader) {
+//     loader.remove();
+//   }
+// }
 
 formElem.addEventListener('submit', onSearch);
 loadMoreBtn.addEventListener('click', onLoadMore);
 
 
 function onSearch(e) {
-  showLoader();
+  loader.style.display = 'inline-block';
   imagesContainer.innerHTML = "";
   e.preventDefault();
   clearGallery();
   galerryApiService.userQuery = e.currentTarget.elements.
       searchQuery.value;
+       setTimeout(()=>{loader.style.display = 'none'; }, 100);
   if (galerryApiService.userQuery.trim() === '') {
     iziToast.error({
                 message: 'Sorry, there are no images matching your search query. Please try again!',
                 position: 'topLeft',
                 transitionIn: "fadeInLeft",
             });
-            hideLoader()
+
+            
+    return;
+    
   };
   showLoadMoreBtn();
   galerryApiService.resetPage();
@@ -98,19 +104,8 @@ function boundingClientRect() {
     });
 }
 
-function generateMarkupGalerry(response) {
-  return response.hits.map((response) => {
-  return `
-            <li class="gallery-item"><a href="${response.largeImageURL}">
-          <img class="gallery-image" src="${response.webformatURL}" alt="${response.tags}"></a>
-          <p>Likes: ${response.likes}</p>
-          <p>Views: ${response.views}</p>
-          <p>Comments: ${response.comments}</p>
-          <p>Downloads: ${response.downloads}</p>
-          </li>`;
-  }).join('');
- 
-}
+ generateMarkupGalerry(response);
+
 
 function appendGallery(response) {
   imagesContainer.insertAdjacentHTML('beforeend', generateMarkupGalerry(response));
