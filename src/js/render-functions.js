@@ -1,5 +1,4 @@
 export default function generateMarkupGallery(response) {
-  console.log(response);
   return response.hits.map((response) => {
   return `
             <li class="gallery-item"><a href="${response.largeImageURL}">
